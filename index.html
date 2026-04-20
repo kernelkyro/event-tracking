@@ -418,6 +418,18 @@
     100% { opacity: 0; transform: translateY(-120vh) scale(1.1); }
   }
 
+  /* all your existing CSS above */
+
+  /* ADD THIS AT THE VERY BOTTOM */
+  @media (hover: none) {
+    *, *::before, *::after {
+      cursor: auto !important;
+    }
+    #cursor-dot, #cursor-ring {
+      display: none;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -562,7 +574,7 @@ let glitchInterval = null;
 let arrived        = false;
 let catLoop        = null;
 
-const BIRTHDAY = new Date('2026-04-21T00:00:00');
+const BIRTHDAY = new Date(2026, 3, 21, 0, 0, 0);
 
 // ═══════════════════════════════════════════════
 //  GLITCH NUMBER
@@ -583,7 +595,7 @@ function stopGlitch() {
 // ═══════════════════════════════════════════════
 //  ARRIVAL CHECK
 // ═══════════════════════════════════════════════
-const FORCE_ARRIVED = false;
+const FORCE_ARRIVED = true;
 
 function checkArrival() {
   const now = new Date();
