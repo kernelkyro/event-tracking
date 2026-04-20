@@ -493,6 +493,9 @@
 // ═══════════════════════════════════════════════
 const cursorDot  = document.getElementById('cursor-dot');
 const cursorRing = document.getElementById('cursor-ring');
+const isTouchDevice =
+  'ontouchstart' in window ||
+  navigator.maxTouchPoints > 0;
 
 let mouseX = window.innerWidth  / 2;
 let mouseY = window.innerHeight / 2;
@@ -501,71 +504,68 @@ let ringY  = mouseY;
 let cursorVisible  = false;
 let lastTrailTime  = 0;
 
-document.addEventListener('mousemove', (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
+if (!isTouchDevice) {
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
 
-  // FIX: reveal cursor on first real mousemove, not before
-  if (!cursorVisible) {
-    cursorVisible = true;
-    cursorDot.style.opacity  = '1';
-    cursorRing.style.opacity = '1';
-  }
+    if (!cursorVisible) {
+      cursorVisible = true;
+      cursorDot.style.opacity  = '1';
+      cursorRing.style.opacity = '1';
+    }
 
-  cursorDot.style.left = mouseX + 'px';
-  cursorDot.style.top  = mouseY + 'px';
+    cursorDot.style.left = mouseX + 'px';
+    cursorDot.style.top  = mouseY + 'px';
 
-  // Trail — throttled to ~40ms
-  const now = Date.now();
-  if (now - lastTrailTime > 40) {
-    lastTrailTime = now;
-    const t  = document.createElement('div');
-    t.className = 'cursor-trail';
-    const sz = 2 + Math.random() * 4;
-    t.style.width  = sz + 'px';
-    t.style.height = sz + 'px';
-    t.style.left = (mouseX + (Math.random() - 0.5) * 8) + 'px';
-    t.style.top  = (mouseY + (Math.random() - 0.5) * 8) + 'px';
-    document.body.appendChild(t);
-    setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 650);
-  }
-});
+    const now = Date.now();
+    if (now - lastTrailTime > 40) {
+      lastTrailTime = now;
 
-// Smooth-follow ring via rAF lerp
-(function animateRing() {
-  ringX += (mouseX - ringX) * 0.13;
-  ringY += (mouseY - ringY) * 0.13;
-  cursorRing.style.left = ringX + 'px';
-  cursorRing.style.top  = ringY + 'px';
-  requestAnimationFrame(animateRing);
-})();
+      const t = document.createElement('div');
+      t.className = 'cursor-trail';
+      const sz = 2 + Math.random() * 4;
+
+      t.style.width  = sz + 'px';
+      t.style.height = sz + 'px';
+      t.style.left = (mouseX + (Math.random() - 0.5) * 8) + 'px';
+      t.style.top  = (mouseY + (Math.random() - 0.5) * 8) + 'px';
+
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 650);
+    }
+  });
+
+  (function animateRing() {
+    ringX += (mouseX - ringX) * 0.13;
+    ringY += (mouseY - ringY) * 0.13;
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top  = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  })();
+}
+
 
 // Expand ring on interactive elements
-document.addEventListener('mouseover', (e) => {
-  if (e.target.matches('button, a, [role="button"]')) {
-    cursorRing.style.width       = '44px';
-    cursorRing.style.height      = '44px';
-    cursorRing.style.borderColor = 'rgba(255,255,255,0.9)';
-  }
-});
-document.addEventListener('mouseout', (e) => {
-  if (e.target.matches('button, a, [role="button"]')) {
-    cursorRing.style.width       = '28px';
-    cursorRing.style.height      = '28px';
-    cursorRing.style.borderColor = 'rgba(255,255,255,0.55)';
-  }
-});
+if (!isTouchDevice) {
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.matches('button, a, [role="button"]')) {
+      cursorRing.style.width = '44px';
+      cursorRing.style.height = '44px';
+      cursorRing.style.borderColor = 'rgba(255,255,255,0.9)';
+    }
+  });
 
-document.addEventListener('mouseleave', () => {
-  cursorDot.style.opacity  = '0';
-  cursorRing.style.opacity = '0';
-});
-document.addEventListener('mouseenter', () => {
-  if (cursorVisible) {
-    cursorDot.style.opacity  = '1';
-    cursorRing.style.opacity = '1';
-  }
-});
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.matches('button, a, [role="button"]')) {
+      cursorRing.style.width = '28px';
+      cursorRing.style.height = '28px';
+      cursorRing.style.borderColor = 'rgba(255,255,255,0.55)';
+    }
+  });
+}
+ 
+
 
 // ═══════════════════════════════════════════════
 //  STATE
@@ -775,6 +775,10 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('reveal-btn').addEventListener('click', goToBirthday);
   startGlitch();
   if (checkArrival()) setTimeout(triggerArrival, 3500);
+  if (isTouchDevice) {
+  cursorDot.style.display = 'none';
+  cursorRing.style.display = 'none';
+}
 });
 </script>
 </body>
